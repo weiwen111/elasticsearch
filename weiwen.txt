@@ -1,0 +1,110 @@
+本地调试：
+    1.先点击右上角的 debug elasticsearch
+    2.然后终端运行  ./gradlew run --debug-jvm
+    2.1 浏览器访问 http://localhost:9200/
+    3.在这里加断点进行调试 org.elasticsearch.rest.RestController#dispatchRequest(org.elasticsearch.rest.RestRequest, org.elasticsearch.rest.RestChannel, org.elasticsearch.common.util.concurrent.ThreadContext)
+    4.跟踪下面几个用例进行代码学习
+
+创建一个名为my_index的索引，并指定一个名为title的字段：
+
+curl -X PUT "localhost:9200/my_index" -H "Content-Type: application/json" -d'
+{
+"mappings": {
+"properties": {
+"title": {
+"type": "text"
+}
+}
+}
+}'
+向my_index索引添加一个文档：
+curl -X POST "localhost:9200/my_index/_doc" -H "Content-Type: application/json" -d'
+{
+"title": "Elasticsearch tutorial"
+}'
+使用_searchAPI搜索包含"Elasticsearch"的文档：
+curl -X GET "localhost:9200/my_index/_search" -H "Content-Type: application/json" -d'
+{
+"query": {
+"match": {
+"title": "Elasticsearch"
+}
+}
+}'
+获取my_index索引的映射信息：
+curl -X GET "localhost:9200/my_index/_mapping"
+更新my_index索引的映射，添加一个名为content的字段：
+curl -X PUT "localhost:9200/my_index/_mapping" -H "Content-Type: application/json" -d'
+{
+"properties": {
+"content": {
+"type": "text"
+}
+}
+}'
+删除my_index索引：
+curl -X DELETE "localhost:9200/my_index"
+
+修改索引分片数：
+要修改索引的分片数，您需要使用_shrink或_splitAPI。_shrink用于将分片数减少到更小的值，而_split用于将分片数增加到更大的值。请注意，这些操作可能会导致数据重新分布，因此可能需要一些时间来完成。
+
+以下是一个使用_shrinkAPI将索引my_index的分片数从5减少到2的示例：
+
+curl -X POST "localhost:9200/my_index/_shrink/my_index_shrunk" -H "Content-Type: application/json" -d'
+{
+"settings": {
+"index.number_of_shards": 2
+}
+}'
+以下是一个使用_splitAPI将索引my_index的分片数从2增加到5的示例：
+
+curl -X POST "localhost:9200/my_index/_split/my_index_split" -H "Content-Type: application/json" -d'
+{
+"settings": {
+"index.number_of_shards": 5
+}
+}'
+
+要为索引添加别名，您可以使用_aliasAPI。以下是一个将别名my_alias添加到索引my_index的示例：
+
+curl -X POST "localhost:9200/my_index/_alias/my_alias"
+现在，您可以使用别名my_alias来查询或操作索引my_index。例如，要使用别名搜索文档，您可以执行以下命令：
+
+curl -X GET "localhost:9200/my_alias/_search" -H "Content-Type: application/json" -d'
+{
+"query": {
+"match_all": {}
+}
+}'
+请注意，您可以为同一个索引添加多个别名。要删除别名，您可以使用_aliasAPI并在请求中添加"action": "remove"。例如：
+
+
+curl -X POST "localhost:9200/my_index/_alias/my_alias" -H "Content-Type: application/json" -d'
+{
+"actions": [
+{
+"remove": {
+"index": "my_index",
+"alias": "my_alias"
+}
+}
+]
+}'
+
+要使用curl修改Elasticsearch中具有指定ID的文档，您可以使用_updateAPI。以下是一个示例，展示了如何修改ID为1的文档：
+
+curl -X POST "localhost:9200/my_index/_doc/1/_update" -H "Content-Type: application/json" -d'
+{
+"doc": {
+"title": "Updated title"
+}
+}'
+在这个示例中，我们将ID为1的文档的title字段更新为Updated title。请注意，这个操作是部分更新，只会修改指定的字段，而不会覆盖整个文档。
+
+如果您想要完全替换整个文档，可以使用_docAPI：
+
+curl -X PUT "localhost:9200/my_index/_doc/1" -H "Content-Type: application/json" -d'
+{
+"title": "New title",
+"content": "New content"
+}'

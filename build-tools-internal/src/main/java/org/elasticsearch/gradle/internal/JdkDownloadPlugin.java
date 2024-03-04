@@ -108,16 +108,18 @@ public class JdkDownloadPlugin implements Plugin<Project> {
                     + "/[module]/[classifier]/jdk/hotspot/normal/adoptium";
             }
         } else if (jdk.getVendor().equals(VENDOR_OPENJDK)) {
-            repoUrl = "https://download.oracle.com";
+            // repoUrl = "https://download.oracle.com";
+            repoUrl = "https://repo.huaweicloud.com";
             if (jdk.getHash() != null) {
                 // current pattern since 12.0.1
-                artifactPattern = "java/GA/jdk"
-                    + jdk.getBaseVersion()
-                    + "/"
-                    + jdk.getHash()
-                    + "/"
-                    + jdk.getBuild()
-                    + "/GPL/openjdk-[revision]_[module]-[classifier]_bin.[ext]";
+                // artifactPattern = "java/GA/jdk"
+                // + jdk.getBaseVersion()
+                // + "/"
+                // + jdk.getHash()
+                // + "/"
+                // + jdk.getBuild()
+                // + "/GPL/openjdk-[revision]_[module]-[classifier]_bin.[ext]";
+                artifactPattern = "openjdk/19.0.2" + "/openjdk-[revision]_[module]-[classifier]_bin.[ext]";
             } else {
                 // simpler legacy pattern from JDK 9 to JDK 12 that we are advocating to Oracle to bring back
                 artifactPattern = "java/GA/jdk"
